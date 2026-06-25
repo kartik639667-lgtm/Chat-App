@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Environment variables (Secret database links)
+.env
+.env.local
+server/.env
+client/.env
+
+# Production builds
+dist/
+build/
