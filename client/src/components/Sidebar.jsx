@@ -1,12 +1,18 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { ChatContext } from '../context/ChatContext';
 import { AuthContext } from '../context/AuthContext';
 import { assets } from '../assets/assets';
 
 const Sidebar = () => {
-  const { users, selectedUser, setSelectedUser, unseenMessages, setUnseenMessages } = useContext(ChatContext);
+  // Added getUsers here
+  const { getUsers, users, selectedUser, setSelectedUser, unseenMessages, setUnseenMessages } = useContext(ChatContext);
   const { onlineUsers, logout } = useContext(AuthContext);
   const [input, setInput] = useState('');
+
+  // Added useEffect to trigger the fetch when the component loads
+  useEffect(() => {
+    getUsers();
+  }, [getUsers]);
 
   const filteredUsers = input 
     ? users.filter((user) => user.fullName.toLowerCase().includes(input.toLowerCase()))
