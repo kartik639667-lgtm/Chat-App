@@ -57,11 +57,13 @@ const ChatContainer = () => {
   const isOnline = onlineUsers.includes(selectedUser._id);
 
   return (
-    <div className="flex flex-col h-full" style={{ background: '#F8F9FB' }}>
-
+    <div
+      className="flex flex-col"
+      style={{ background: '#F8F9FB', height: '100%', maxHeight: '100vh', overflow: 'hidden' }}
+    >
       {/* Header */}
       <div
-        className="flex items-center justify-between px-5 py-3 border-b border-gray-200"
+        className="flex items-center justify-between px-5 py-3 border-b border-gray-200 flex-shrink-0"
         style={{ background: '#FFFFFF' }}
       >
         <div className="flex items-center gap-3">
@@ -106,8 +108,11 @@ const ChatContainer = () => {
         </button>
       </div>
 
-      {/* Chat area */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
+      {/* Chat area — minHeight: 0 is the key fix for scroll */}
+      <div
+        className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3"
+        style={{ minHeight: 0 }}
+      >
         {isMessagesLoading ? (
           <div className="flex justify-center items-center h-full">
             <div className="flex gap-1">
@@ -175,7 +180,10 @@ const ChatContainer = () => {
       </div>
 
       {/* Input area */}
-      <div className="px-4 py-3 border-t border-gray-200" style={{ background: '#FFFFFF' }}>
+      <div
+        className="px-4 py-3 border-t border-gray-200 flex-shrink-0"
+        style={{ background: '#FFFFFF' }}
+      >
         <form
           onSubmit={handleSendMessage}
           className="flex items-center gap-3 rounded-2xl px-4 py-2"
