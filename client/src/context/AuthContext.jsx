@@ -10,7 +10,6 @@ export const AuthProvider = ({ children }) => {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [socket, setSocket] = useState(null);
 
-  // Update this to your deployed backend URL when deploying
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   // 1. Check Authentication Status on Initial Load
@@ -41,15 +40,25 @@ export const AuthProvider = ({ children }) => {
     if (authUser) {
       const newSocket = io(backendUrl, {
         query: { userId: authUser._id },
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
       });
       setSocket(newSocket);
 
-      // Listen for the online users list from the server
       newSocket.on("getOnlineUsers", (users) => {
         setOnlineUsers(users);
       });
 
-      // Cleanup function to close the socket when the user logs out or component unmounts
+      newSocket.on("connect", () => {
+        console.log("Socket connected:", newSocket.id);
+      });
+
+      newSocket.on("disconnect", () => {
+        console.log("Socket disconnected");
+      });
+
       return () => newSocket.close();
     } else {
       if (socket) {
@@ -84,7 +93,7 @@ export const AuthProvider = ({ children }) => {
     toast.success("Logged out successfully");
   };
 
-  // 5. Handle Profile Updates (Name, Bio, Avatar)
+  // 5. Handle Profile Updates
   const updateProfile = async (data) => {
     try {
       const token = localStorage.getItem("token");

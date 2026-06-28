@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import http from 'http';
 import { connectDB } from './lib/db.js';
-import { initSocket } from './lib/socket.js'; // FIX: extracted to break circular dependency
+import { initSocket } from './lib/socket.js';
 import userRouter from './routes/userRoutes.js';
 import messageRouter from './routes/messageRoutes.js';
 
@@ -12,10 +12,9 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// FIX: Initialize Socket.io from separate module (no more circular import)
+// FIX: Initialize Socket.io from separate module
 initSocket(server);
 
-// FIX: Restrict CORS to your frontend URL in production
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:5173',
   'https://chat-app-pi-three-44.vercel.app',
@@ -43,8 +42,6 @@ app.get('/api/status', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// FIX: Always start the server — removed the NODE_ENV check that blocked
-// DB connection and startup in production (Render/Railway).
 server.listen(PORT, async () => {
   await connectDB();
   console.log('Server is running on port ' + PORT);
