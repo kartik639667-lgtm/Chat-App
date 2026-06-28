@@ -18,6 +18,7 @@ initSocket(server);
 // FIX: Restrict CORS to your frontend URL in production
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:5173',
+  'https://chat-app-pi-three-44.vercel.app',
 ];
 
 app.use(cors({
