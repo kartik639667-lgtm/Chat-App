@@ -8,15 +8,14 @@ const Sidebar = () => {
   const { onlineUsers, logout } = useContext(AuthContext);
   const [input, setInput] = useState('');
 
-  // Triggers the data fetch when the component loads
+  // FIX: getUsers is now stable (useCallback in ChatContext) so no infinite loop
   useEffect(() => {
     getUsers();
   }, [getUsers]);
 
-  // Safely filters users, falling back to an empty array if data is still loading
-  const filteredUsers = input 
-    ? (users || []).filter((user) => user.fullName?.toLowerCase().includes(input.toLowerCase()))
-    : (users || []);
+  const filteredUsers = input
+    ? users.filter((user) => user.fullName.toLowerCase().includes(input.toLowerCase()))
+    : users;
 
   const handleUserSelect = (user) => {
     setSelectedUser(user);
@@ -40,9 +39,9 @@ const Sidebar = () => {
         </div>
         <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
           <img src={assets.search_icon} alt="Search" className="w-4 h-4 mr-2 opacity-50" />
-          <input 
-            type="text" 
-            placeholder="Search user..." 
+          <input
+            type="text"
+            placeholder="Search user..."
             className="bg-transparent outline-none w-full text-sm"
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -52,29 +51,29 @@ const Sidebar = () => {
 
       {/* Users List */}
       <div className="flex-1 overflow-y-auto p-2">
-        {(filteredUsers || []).map((user) => (
-          <div 
-            key={user._id} 
+        {filteredUsers.map((user) => (
+          <div
+            key={user._id}
             onClick={() => handleUserSelect(user)}
-            className={`flex items-center p-3 mb-2 cursor-pointer rounded-xl transition ${selectedUser?._id === user._id ? 'bg-violet-50 border-violet-100' : 'hover:bg-gray-50'}`}
+            className={`flex items-center p-3 mb-2 cursor-pointer rounded-xl transition ${
+              selectedUser?._id === user._id ? 'bg-violet-50 border-violet-100' : 'hover:bg-gray-50'
+            }`}
           >
             <div className="relative">
-              <img 
-                src={user.profilePic || assets.avatar_icon} 
-                alt="Profile" 
-                className="w-12 h-12 rounded-full object-cover border border-gray-200" 
+              <img
+                src={user.profilePic || assets.avatar_icon}
+                alt="Profile"
+                className="w-12 h-12 rounded-full object-cover border border-gray-200"
               />
-              {/* Optional chaining and fallback array to prevent crashes */}
-              {(onlineUsers || []).includes(user._id) && (
+              {onlineUsers.includes(user._id) && (
                 <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
               )}
             </div>
             <div className="ml-3 flex-1">
               <p className="font-semibold text-gray-800">{user.fullName}</p>
-              <p className="text-xs text-gray-500">{(onlineUsers || []).includes(user._id) ? 'Online' : 'Offline'}</p>
+              <p className="text-xs text-gray-500">{onlineUsers.includes(user._id) ? 'Online' : 'Offline'}</p>
             </div>
-            {/* Safe check for unseen messages using optional chaining (?.) */}
-            {(unseenMessages?.[user._id] > 0) && (
+            {unseenMessages[user._id] > 0 && (
               <div className="bg-violet-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {unseenMessages[user._id]}
               </div>
