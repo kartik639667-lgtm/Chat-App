@@ -12,6 +12,14 @@ export const AuthProvider = ({ children }) => {
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
+  // Keep Render backend alive by pinging every 10 minutes
+useEffect(() => {
+  const interval = setInterval(() => {
+    fetch(`${backendUrl}/api/status`).catch(() => {});
+  }, 14 * 1000);
+  return () => clearInterval(interval);
+}, [backendUrl]);
+
   // 1. Check Authentication Status on Initial Load
   useEffect(() => {
     const checkAuth = async () => {
