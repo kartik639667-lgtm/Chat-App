@@ -12,7 +12,6 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// FIX: Initialize Socket.io from separate module
 initSocket(server);
 
 const allowedOrigins = [
@@ -31,7 +30,7 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json({ limit: '4mb' }));
+app.use(express.json({ limit: '10mb' }));
 
 app.use('/api/auth', userRouter);
 app.use('/api/messages', messageRouter);
