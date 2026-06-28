@@ -2,12 +2,14 @@ import { useContext, useState, useEffect } from 'react';
 import { ChatContext } from '../context/ChatContext';
 import { AuthContext } from '../context/AuthContext';
 import { assets } from '../assets/assets';
+import EditProfileModal from './EditProfileModal';
 
 const Sidebar = () => {
   const { getUsers, users, selectedUser, setSelectedUser, unseenMessages, setUnseenMessages } = useContext(ChatContext);
   const { onlineUsers, logout } = useContext(AuthContext);
   const [input, setInput] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
 
   useEffect(() => {
     getUsers();
@@ -71,9 +73,10 @@ const Sidebar = () => {
                 className="absolute right-0 top-full mt-1 rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50"
                 style={{ background: '#FFFFFF', minWidth: '150px' }}
               >
+                {/* ✅ Fixed: now opens the modal */}
                 <button
                   className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  onClick={() => setMenuOpen(false)}
+                  onClick={() => { setMenuOpen(false); setShowEditProfile(true); }}
                 >
                   ✏️ Edit Profile
                 </button>
@@ -184,6 +187,9 @@ const Sidebar = () => {
           })
         )}
       </div>
+
+      {/* ✅ Edit Profile Modal */}
+      {showEditProfile && <EditProfileModal onClose={() => setShowEditProfile(false)} />}
     </div>
   );
 };
