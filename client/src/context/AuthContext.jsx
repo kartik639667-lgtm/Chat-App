@@ -12,13 +12,13 @@ export const AuthProvider = ({ children }) => {
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-  // Keep Render backend alive by pinging every 10 minutes
-useEffect(() => {
-  const interval = setInterval(() => {
-    fetch(`${backendUrl}/api/status`).catch(() => {});
-  }, 14 * 1000);
-  return () => clearInterval(interval);
-}, [backendUrl]);
+  // Keep Render backend alive by pinging every 14 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch(`${backendUrl}/api/status`).catch(() => {});
+    }, 14 * 1000);
+    return () => clearInterval(interval);
+  }, [backendUrl]);
 
   // 1. Check Authentication Status on Initial Load
   useEffect(() => {
@@ -50,8 +50,9 @@ useEffect(() => {
         query: { userId: authUser._id },
         transports: ['websocket', 'polling'],
         reconnection: true,
-        reconnectionAttempts: 5,
+        reconnectionAttempts: Infinity,
         reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
       });
       setSocket(newSocket);
 
@@ -63,8 +64,8 @@ useEffect(() => {
         console.log("Socket connected:", newSocket.id);
       });
 
-      newSocket.on("disconnect", () => {
-        console.log("Socket disconnected");
+      newSocket.on("disconnect", (reason) => {
+        console.log("Socket disconnected:", reason);
       });
 
       return () => newSocket.close();

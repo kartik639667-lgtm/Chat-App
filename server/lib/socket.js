@@ -13,8 +13,8 @@ export const initSocket = (server) => {
       credentials: true,
     },
     transports: ['websocket', 'polling'],
-    pingTimeout: 60000,
-    pingInterval: 25000,
+    pingTimeout: 10000,
+    pingInterval: 5000,
   });
 
   io.on('connection', (socket) => {
@@ -22,24 +22,21 @@ export const initSocket = (server) => {
     console.log('User connected:', userId);
 
     if (userId) {
+      // If user already has a socket, remove old one first
       userSocketMap[userId] = socket.id;
     }
 
-    // Emit updated online users list to everyone
     io.emit('getOnlineUsers', Object.keys(userSocketMap));
 
-    socket.on('disconnect', () => {
-      console.log('User disconnected:', userId);
-      delete userSocketMap[userId];
-      io.emit('getOnlineUsers', Object.keys(userSocketMap));
-    });
+    socket.on('disconnect', (reason) => {
+      console.log('User disconnected:', userId, 'Reason:', reason);
 
-    // Handle reconnection — update socket id if user reconnects
-    socket.on('reconnect', () => {
-      if (userId) {
-        userSocketMap[userId] = socket.id;
-        io.emit('getOnlineUsers', Object.keys(userSocketMap));
+      // Only remove if this is still the active socket for this user
+      if (userSocketMap[userId] === socket.id) {
+        delete userSocketMap[userId];
       }
+
+      io.emit('getOnlineUsers', Object.keys(userSocketMap));
     });
   });
 };
