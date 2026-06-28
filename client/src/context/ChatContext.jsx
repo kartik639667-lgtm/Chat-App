@@ -11,13 +11,11 @@ export const ChatProvider = ({ children }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isUsersLoading, setIsUsersLoading] = useState(false);
   const [isMessagesLoading, setIsMessagesLoading] = useState(false);
-  // FIX: Added unseenMessages — Sidebar was already using this but it was never defined here
   const [unseenMessages, setUnseenMessages] = useState({});
 
   const { socket } = useContext(AuthContext);
   const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
-  // FIX: useCallback makes getUsers stable so Sidebar's useEffect doesn't loop infinitely
   const getUsers = useCallback(async () => {
     setIsUsersLoading(true);
     try {
@@ -48,8 +46,6 @@ export const ChatProvider = ({ children }) => {
     }
   }, [backendUrl]);
 
-  // FIX: Load messages whenever the selected user changes
-  // Previously getMessages was never called, so the chat was always empty
   useEffect(() => {
     if (selectedUser) {
       getMessages(selectedUser._id);
@@ -72,30 +68,26 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  const subscribeToMessages = useCallback(() => {
-    if (!selectedUser || !socket) return;
+  // FIX: removed selectedUser dependency — now listens even when no chat is open
+  // so unseen badge always increments for messages from any user
+  useEffect(() => {
+    if (!socket) return;
 
     socket.on('newMessage', (newMessage) => {
-      if (newMessage.senderId === selectedUser._id) {
+      // if the message is from the currently open chat → add to messages
+      if (selectedUser && newMessage.senderId === selectedUser._id) {
         setMessages((prev) => [...prev, newMessage]);
       } else {
-        // FIX: Messages from other users now increment unseen count instead of being dropped
+        // message from someone else → increment their unseen badge
         setUnseenMessages((prev) => ({
           ...prev,
           [newMessage.senderId]: (prev[newMessage.senderId] || 0) + 1,
         }));
       }
     });
-  }, [selectedUser, socket]);
 
-  const unsubscribeFromMessages = useCallback(() => {
-    if (socket) socket.off('newMessage');
-  }, [socket]);
-
-  useEffect(() => {
-    subscribeToMessages();
-    return () => unsubscribeFromMessages();
-  }, [subscribeToMessages, unsubscribeFromMessages]);
+    return () => socket.off('newMessage');
+  }, [socket, selectedUser]);
 
   return (
     <ChatContext.Provider
